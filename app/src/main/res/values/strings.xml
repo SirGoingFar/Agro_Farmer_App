@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Agro Farmer</string>
+    <string name="mock_text_farmer_name">Olanrewaju Emmanuel Akintunde</string>
+    <string name="mock_text_phone_number">08137723675</string>
+    <string name="mock_text_state">OSUN</string>
 </resources>

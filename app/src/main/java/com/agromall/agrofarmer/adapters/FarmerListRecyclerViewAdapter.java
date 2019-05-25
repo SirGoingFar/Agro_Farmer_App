@@ -1,0 +1,93 @@
+package com.agromall.agrofarmer.adapters;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.agromall.agrofarmer.R;
+import com.agromall.agrofarmer.data.models.FarmerData;
+import com.agromall.agrofarmer.utils.Prefs;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class FarmerListRecyclerViewAdapter extends RecyclerView.Adapter<FarmerListRecyclerViewAdapter.FarmerViewHolder> {
+
+    private final Context mContext;
+    private Prefs mPref;
+    private String mImageBaseUrl;
+    private List<FarmerData.FarmerDetail> mDataList = new ArrayList<>();
+
+    public FarmerListRecyclerViewAdapter(Context context) {
+        mContext = context;
+        mPref = Prefs.getInstance();
+        mImageBaseUrl = mPref.getImageBaseUrl();
+    }
+
+    @NonNull
+    @Override
+    public FarmerListRecyclerViewAdapter.FarmerViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        return new FarmerViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_farmer_detail, viewGroup, false));
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull FarmerListRecyclerViewAdapter.FarmerViewHolder viewHolder, int i) {
+        FarmerData.FarmerDetail farmerDetail = viewHolder.getCurrentItem();
+        String imageUrl = mImageBaseUrl.concat(farmerDetail.getPassportPhoto());
+        viewHolder.farmerName.setText(farmerDetail.getFirstName());
+        viewHolder.farmerContact.setText(farmerDetail.getMobileNo());
+        viewHolder.farmerState.setText(farmerDetail.getState());
+        Glide.with(mContext).load(imageUrl).diskCacheStrategy(DiskCacheStrategy.ALL).into(viewHolder.ivUserImage);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mDataList.size();
+    }
+
+    public void refreshData(List<FarmerData.FarmerDetail> dataList) {
+        if (dataList == null)
+            return;
+
+        mDataList = dataList;
+        notifyDataSetChanged();
+    }
+
+    class FarmerViewHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.container)
+        ConstraintLayout viewContainer;
+
+        @BindView(R.id.civ_farmer_image)
+        ImageView ivUserImage;
+
+        @BindView(R.id.tv_farmer_name)
+        TextView farmerName;
+
+        @BindView(R.id.tv_farmer_number)
+        TextView farmerContact;
+
+        @BindView(R.id.tv_farmer_state)
+        TextView farmerState;
+
+        FarmerViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this, view);
+        }
+
+        FarmerData.FarmerDetail getCurrentItem() {
+            return mDataList.get(getAdapterPosition());
+        }
+    }
+}
