@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.agromall.agrofarmer.R;
 import com.agromall.agrofarmer.data.models.FarmerData;
+import com.agromall.agrofarmer.data.models.FarmerDetail;
+import com.agromall.agrofarmer.utils.Constants;
 import com.agromall.agrofarmer.utils.Prefs;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -25,14 +27,10 @@ import butterknife.ButterKnife;
 public class FarmerListRecyclerViewAdapter extends RecyclerView.Adapter<FarmerListRecyclerViewAdapter.FarmerViewHolder> {
 
     private final Context mContext;
-    private Prefs mPref;
-    private String mImageBaseUrl;
-    private List<FarmerData.FarmerDetail> mDataList = new ArrayList<>();
+    private List<FarmerDetail> mDataList = new ArrayList<>();
 
     public FarmerListRecyclerViewAdapter(Context context) {
         mContext = context;
-        mPref = Prefs.getInstance();
-        mImageBaseUrl = mPref.getImageBaseUrl();
     }
 
     @NonNull
@@ -43,11 +41,11 @@ public class FarmerListRecyclerViewAdapter extends RecyclerView.Adapter<FarmerLi
 
     @Override
     public void onBindViewHolder(@NonNull FarmerListRecyclerViewAdapter.FarmerViewHolder viewHolder, int i) {
-        FarmerData.FarmerDetail farmerDetail = viewHolder.getCurrentItem();
-        String imageUrl = mImageBaseUrl.concat(farmerDetail.getPassportPhoto());
+        FarmerDetail farmerDetail = viewHolder.getCurrentItem();
+        String imageUrl = Constants.BASE_IMAGE_URL.concat(farmerDetail.getPassportPhoto());
         viewHolder.farmerName.setText(farmerDetail.getFirstName());
         viewHolder.farmerContact.setText(farmerDetail.getMobileNo());
-        viewHolder.farmerState.setText(farmerDetail.getState());
+        viewHolder.farmerState.setText(farmerDetail.getCity());
         Glide.with(mContext).load(imageUrl).diskCacheStrategy(DiskCacheStrategy.ALL).into(viewHolder.ivUserImage);
     }
 
@@ -56,7 +54,7 @@ public class FarmerListRecyclerViewAdapter extends RecyclerView.Adapter<FarmerLi
         return mDataList.size();
     }
 
-    public void refreshData(List<FarmerData.FarmerDetail> dataList) {
+    public void refreshData(List<FarmerDetail> dataList) {
         if (dataList == null)
             return;
 
@@ -86,7 +84,7 @@ public class FarmerListRecyclerViewAdapter extends RecyclerView.Adapter<FarmerLi
             ButterKnife.bind(this, view);
         }
 
-        FarmerData.FarmerDetail getCurrentItem() {
+        FarmerDetail getCurrentItem() {
             return mDataList.get(getAdapterPosition());
         }
     }

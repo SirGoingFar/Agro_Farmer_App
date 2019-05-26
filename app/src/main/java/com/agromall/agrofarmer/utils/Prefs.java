@@ -62,7 +62,7 @@ public class Prefs {
         editor.putInt(PREF_LAST_PAGE_NUMBER, lastPageNumber).apply();
     }
 
-    public int getLastPAgeNumber() {
+    public int getLastPageNumber() {
         return mPrefs.getInt(PREF_LAST_PAGE_NUMBER, -1);
     }
 }

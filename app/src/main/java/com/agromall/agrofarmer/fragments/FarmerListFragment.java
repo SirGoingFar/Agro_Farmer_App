@@ -12,63 +12,81 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.agromall.agrofarmer.R;
 import com.agromall.agrofarmer.activities.FarmersCatalogActivity;
 import com.agromall.agrofarmer.adapters.FarmerListRecyclerViewAdapter;
 import com.agromall.agrofarmer.custom.EndlessRecyclerOnScrollListener;
 import com.agromall.agrofarmer.data.database.AgroFarmerAppViewModelFactory;
-import com.agromall.agrofarmer.data.models.FarmerData;
+import com.agromall.agrofarmer.data.models.FarmerDetail;
 import com.agromall.agrofarmer.data.viewmodels.AgroFarmerAppViewModel;
 import com.agromall.agrofarmer.utils.Prefs;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class FarmerListFragment extends Fragment {
 
     class ViewHolder {
 
-        @BindView(R.id.rv_farmer_data)
-        RecyclerView farmerList;
-
         private EndlessRecyclerOnScrollListener scrollListener;
         private FarmerListRecyclerViewAdapter mAdapter;
-        private final View container;
+        private RecyclerView farmerList;
+        private ProgressBar loadingProgressBar;
 
         ViewHolder(View view) {
-            this.container = view;
             init(view);
         }
 
         private void init(View view) {
 
-            scrollListener = new EndlessRecyclerOnScrollListener(currentPage, currentPage <= lastPage) {
+            scrollListener = new EndlessRecyclerOnScrollListener(currentPage, false) {
                 @Override
                 public void onLoadMore(int nextPage) {
                     currentPage++;
-                    lastPage = mPrefs.getLastPAgeNumber();
+
+                    if (currentPage < mPrefs.getLastPageNumber()) {
+                        loadMore();
+                        setLoading();
+                    }
                 }
             };
 
+            loadingProgressBar = view.findViewById(R.id.pb_loading);
+            farmerList = view.findViewById(R.id.rv_farmer_data);
             mAdapter = new FarmerListRecyclerViewAdapter(catalogActivity);
             farmerList.setHasFixedSize(true);
+            farmerList.addOnScrollListener(scrollListener);
             farmerList.setLayoutManager(new LinearLayoutManager(catalogActivity, LinearLayoutManager.VERTICAL, false));
             farmerList.setAdapter(mAdapter);
         }
 
-        public void refreshData(List<FarmerData.FarmerDetail> farmerList) {
-            mAdapter.refreshData(farmerList);
+        private void setLoading() {
+            loadingProgressBar.setVisibility(View.VISIBLE);
         }
+
+        private void setLoaded() {
+            loadingProgressBar.setVisibility(View.GONE);
+        }
+
+        void refreshData(List<FarmerDetail> farmerList) {
+            mAdapter.refreshData(farmerList);
+            setLoaded();
+            scrollListener.setIsLastPage(currentPage > mPrefs.getLastPageNumber());
+        }
+    }
+
+    private void loadMore() {
+        model.loadMore();
     }
 
     public class Model {
 
         private AgroFarmerAppViewModel mViewModel;
-        private List<FarmerData.FarmerDetail> mFarmerList;
+        private List<FarmerDetail> mFarmerList;
 
         Model() {
             AgroFarmerAppViewModelFactory factory = new AgroFarmerAppViewModelFactory(catalogActivity.getApplication(), FarmerListFragment.this);
@@ -80,9 +98,9 @@ public class FarmerListFragment extends Fragment {
         void init() {
 
             //observe Farmer List change
-            mViewModel.getFarmerListObserver().observe(FarmerListFragment.this, new Observer<List<FarmerData.FarmerDetail>>() {
+            mViewModel.getFarmerListObserver().observe(FarmerListFragment.this, new Observer<List<FarmerDetail>>() {
                 @Override
-                public void onChanged(@Nullable List<FarmerData.FarmerDetail> farmerDetails) {
+                public void onChanged(@Nullable List<FarmerDetail> farmerDetails) {
                     if (farmerDetails == null)
                         return;
 
@@ -90,8 +108,14 @@ public class FarmerListFragment extends Fragment {
                     refreshView(mFarmerList);
                 }
             });
+
+            loadMore();
         }
 
+        void loadMore() {
+            mViewModel.getFarmerList(currentPage);
+            setLoading();
+        }
     }
 
     private FarmersCatalogActivity catalogActivity;
@@ -139,7 +163,11 @@ public class FarmerListFragment extends Fragment {
         model.init();
     }
 
-    private void refreshView(List<FarmerData.FarmerDetail> farmerList) {
+    private void refreshView(List<FarmerDetail> farmerList) {
         viewHolder.refreshData(farmerList);
+    }
+
+    private void setLoading() {
+        viewHolder.setLoading();
     }
 }

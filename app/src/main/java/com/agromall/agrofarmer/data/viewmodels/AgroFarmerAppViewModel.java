@@ -44,6 +44,7 @@ public class AgroFarmerAppViewModel extends AndroidViewModel {
         mFarmerDetailMutableLiveData = new MutableLiveData<>();
         mDb = App.getDatabase();
         mExecutors = App.getExecutors();
+        prefs = Prefs.getInstance();
     }
 
     public LiveData<List<FarmerDetail>> getFarmerListObserver() {
@@ -133,6 +134,9 @@ public class AgroFarmerAppViewModel extends AndroidViewModel {
 
                         //save the last fetched page number
                         prefs.setLastFetchedPageNumber(finalPage);
+
+                        //save max page
+                        prefs.setLastPageNumber(data.getData().getTotalRec());
                     }
                 }
 
@@ -146,12 +150,13 @@ public class AgroFarmerAppViewModel extends AndroidViewModel {
         public void getFarmerData(int page) {
 
             Object dataObject = getLocalData(page);
+
             if (dataObject != null) {
 
                 try {
                     List<FarmerDetail> farmerList = (List<FarmerDetail>) dataObject;
                     setFarmerListMutableLiveData(farmerList);
-                }catch (Exception exception){
+                } catch (Exception exception) {
                     exception.printStackTrace();
                 }
 

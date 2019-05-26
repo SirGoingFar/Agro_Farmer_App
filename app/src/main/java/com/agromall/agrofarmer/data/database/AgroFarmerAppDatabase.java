@@ -6,8 +6,9 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import com.agromall.agrofarmer.data.models.FarmerData;
+import com.agromall.agrofarmer.data.models.FarmerDetail;
 
-@Database(entities = {FarmerData.FarmerDetail.class}, version = 1, exportSchema = false)
+@Database(entities = {FarmerDetail.class}, version = 1, exportSchema = false)
 public abstract class AgroFarmerAppDatabase extends RoomDatabase {
     private static final String LOG_TAG = AgroFarmerAppDatabase.class.getSimpleName();
     private static final Object LOCK = new Object();
